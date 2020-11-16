@@ -62,6 +62,20 @@ def matching_approx(G, start_time, cutoff):
     return len(nodes), max_match
 
 
+def gic(G, start_time, cutoff):
+    cover = set()
+    edges = G.number_of_edges()
+
+    while (edges) > 0 and ((time.time() - start_time) < cutoff):
+        min_node = min(dict(G.degree), key=dict(G.degree).get)
+        for v in list(G.neighbors(min_node)):
+            cover.add(v)  # add to vertex cover
+            G.remove_node(v)  # remove neighbor node
+        G.remove_node(min_node)  # remove min degree node
+        edges = G.number_of_edges()
+
+    return len(cover), cover
+
 def main(graph, algo, cutoff, seed):
     G = parse_edges(graph)
     graph_name = graph.split('/')[-1].split('.')[0]
