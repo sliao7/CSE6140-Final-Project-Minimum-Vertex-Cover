@@ -5,105 +5,9 @@ import os
 import heapq
 from collections import deque,defaultdict
 import argparse
+from graph import graph
 
-class vertex:
-    def __init__(self,node):
-        self.id = node
-        self.adjacent = set()
-
-    def __str__(self):
-        # for print out result
-        return str(self.id) + ' adjacent: ' + str([x.id for x in self.adjacent])
-
-    def add_neighbor(self, neighbor):
-    
-        self.adjacent.add(neighbor)
-
-    def remove_neighbor(self, neighbor):
-        if neighbor in self.adjacent:
-            self.adjacent.remove(neighbor)
-
-    def is_connected(self,neighbor):
-        return neighbor in self.adjacent
-
-    def get_connections(self):
-        return self.adjacent
-
-
-
-class graph:
-    # unweighted undirected graph
-    # can be connected or not
-    def __init__(self):
-        self.vert_dict = {} # vertex_id (int) : vertex
-        self.num_vertices = 0
-        self.num_edges = 0
-
-    def __iter__(self):
-        return iter(self.vert_dict.values())
-
-    def add_vertex(self,node):
-        self.num_vertices += 1
-        new_vertex = vertex(node)
-        self.vert_dict[node] = new_vertex
-
-    def get_vertex(self,node):
-        if node in self.vert_dict:
-            return self.vert_dict[node]
-        else:
-            return None
-
-    def add_edge(self, frm, to):
-        # for new vertices
-        if frm not in self.vert_dict:
-            self.add_vertex(frm)
-        if to not in self.vert_dict:
-            self.add_vertex(to)
-
-        if not self.vert_dict[frm].is_connected(self.vert_dict[to]):
-            self.num_edges += 1
-
-        self.vert_dict[frm].add_neighbor(self.vert_dict[to])
-        self.vert_dict[to].add_neighbor(self.vert_dict[frm])
-
-
-    def remove_edge(self, frm, to):
-        self.vert_dict[frm].remove_neighbor(self.vert_dict[to])
-        self.vert_dict[to].remove_neighbor(self.vert_dict[frm])
-        self.num_edges -= 1
-    
-    def remove_vertex(self,node,inplace = False):
-        
-        G = self.copy() if not inplace else self
-        
-        for neighbor in list(G.vert_dict[node].get_connections()):
-            G.remove_edge(node, neighbor.id)
-            if not neighbor.get_connections():
-                del G.vert_dict[neighbor.id]
-        del G.vert_dict[node]
-        
-        return G
-            
-
-    def get_vertices(self):
-        # return a list of ints, the id of vertices
-        return list(self.vert_dict.keys())
-    
-    def get_vertex_degree(self,node):
-        return len(self.get_vertex(node).adjacent)
-    
-    def get_max_degree_vertex(self):
-        return max(self.vert_dict, key = lambda x: len(self.get_vertex(x).get_connections()))
-    
-    def copy(self):
-        copy = graph()
-        for v in self.vert_dict:
-            for u in self.vert_dict[v].get_connections():
-                copy.add_edge(v,u.id)
-        return copy
-
-
-        # read data and construct a graph object
+# read data and construct a graph object
 def parse_edges(filename):
     # parse edges from graph file to create your graph object
     # filename: string of the filename
@@ -174,7 +78,7 @@ def find_next(V_prime, G_prime, Explored):
 
 
 class node:
-    'decision node'
+    # decision node in our Decision Tree
     def __init__(self,id, parent,lb,state):
 
         self.id = id # the id of the vertex in the original graph G
@@ -263,6 +167,7 @@ def Branch_and_Bound(G, start_time, cutoff):
         if not V_prime:
             # solution found
             if cover_size < opt_num:
+                # update solution
                 opt_num = cover_size
                 opt_cover = new_cover 
                 # print('Optimal:', opt_num)
