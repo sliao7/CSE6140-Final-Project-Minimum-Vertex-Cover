@@ -10,6 +10,8 @@ import random
 import numpy as np
 from time import time
 
+import os
+
 # read data and construct a graph object
 
 
@@ -140,7 +142,7 @@ class manual_runner():
         NUM_VERTICES = len(self.graph.get_vertices())
         return [1 if random.random() < bar else 0 for i in range(NUM_VERTICES)]
 
-    def run_test(self, MU=50, NGEN=10, LAMBDA=100, CXPB=0.7, MUTPB=0.2, verbose=False):
+    def run_test(self, MU=50, NGEN=10, LAMBDA=100, CXPB=0.7, MUTPB=0.2, verbose=False, cutoff=600, trace_path=None, start=0):
         NUM_VERTICES = len(self.graph.get_vertices())
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -202,7 +204,7 @@ class manual_runner():
         stagnant = 0
         # Begin the evolution
         # while g < NGEN and time() - s < 595 and (stagnant < 1000 or True):
-        while g < NGEN and time() - s < 595 and stagnant < 1000:
+        while g < NGEN and time() - s < cutoff - 2 and stagnant < 1000:
             # A new generation
             g = g + 1
             if g % 10 == 0 and verbose:
@@ -210,8 +212,7 @@ class manual_runner():
 
             # Select the next generation individuals
             offspring = toolbox.select(pop, len(pop))
-            # for i in range(len(pop) // 10):
-            #     offspring.append(creator.Individual(self.create_individual()))
+
             # Clone the selected individuals
             offspring = list(map(toolbox.clone, offspring))
 
@@ -255,30 +256,25 @@ class manual_runner():
             # Gather all the fitnesses in one list and print the stats
             fits = [ind.fitness.values[0] for ind in pop]
 
-            # pop = sorted(pop, key=lambda x: x.fitness.values[0], reverse=True)
-            # The population is entirely replaced by the offspring
-            # for i, o in enumerate(valid_offspring):
-            #     pop[i] = o
-            pop[:] = offspring
-
-            # Gather all the fitnesses in one list and print the stats
-            fits = [ind.fitness.values[0] for ind in pop]
-
             length = len(pop)
             mean = sum(fits) / length
             sum2 = sum(x*x for x in fits)
             std = abs(sum2 / length - mean**2)**0.5
             if overall_best is None or overall_best.fitness.values[0] < max(fits):
                 stagnant = 0
+                total_time = round((time() - s), 2)
                 overall_best = tools.selBest(pop, 1)[0]
+                if trace_path is not None:
+                    with open(trace_path, 'a') as f:
+                        f.write(
+                            ','.join([str(time() - start), str(sum(overall_best))]) + "\n")
             else:
                 stagnant += 1
+
             if g % 10 == 0 and verbose:
                 print(
                     f"  Min {min(fits):.2f} \t Max {max(fits):.2f} \t Avg {mean:.2f} \t std: {std:.2f}")
-#             print("  Max %s" % max(fits))
-#             print("  Avg %s" % mean)
-#             print("  Std %s" % std)
+
         if verbose:
             print("-- End of (successful) evolution --")
 
@@ -293,8 +289,13 @@ class manual_runner():
         e = time()
         if verbose:
             print(f"Time: {e - s}s")
+
         return overall_best
         # print(f"{pop}-{stats}-{hof}")
+
+    def sorted_vertex_ids(self, c):
+        return sorted([self.vertex_to_ids[i]
+                       for i in range(len(c)) if c[i] == 1])
 
     def score_candidate(self, c):
         # verts = set([i+1 for i in range(len(c)) if c[i] == 1])
@@ -322,17 +323,37 @@ class manual_runner():
         return (len(self.graph.get_vertices()) - len(verts),)
 
 
-def main(graph_name):
+def main(graph_name, cutoff, seed, algo, verbose=False):
+    random.seed(seed)
+    s = time()
+    graph_path = graph_name.split('/')[-1].split('.')[0]
+    sol_file = "_".join([graph_path, algo, str(cutoff)]) + '.sol'
+
+    trace_file = "_".join([graph_path, algo, str(cutoff)]) + '.trace'
+    output_dir = '../output/'
+
     runner = manual_runner(graph_name)
-    # pop_size = min(2*len(runner.graph.vert_dict), 1000)
-    # print(runner.score_candidate([0, 1, 1, 1, 0, 0, 0, 0, 0]))
-    # print(runner.score_candidate([1 for v in runner.graph.vert_dict.keys()]))
-    # print(len(runner.graph.vert_dict.keys()))
-    # print(sorted([k for k in runner.graph.vert_dict.keys()]))
+
     pop_size = 3 * len(runner.graph.vert_dict)
     best_ind = runner.run_test(MU=pop_size,
-                               MUTPB=0.1, CXPB=0.001, NGEN=1000, verbose=True)
-    print(f"Number Vertices: {sum(best_ind)}")
+                               MUTPB=0.1, CXPB=0.001, NGEN=1000, verbose=verbose, cutoff=cutoff, trace_path=os.path.join(output_dir, trace_file), start=s)
+    total_time = round((time() - s), 2)
+    num_nodes = sum(best_ind)
+    solution_vertices = runner.sorted_vertex_ids(best_ind)
+    if verbose:
+        print(f"Number Vertices: {sum(num_nodes)}")
+
+    # Create output directory if it does not exist
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    with open(os.path.join(output_dir, sol_file), 'w') as f:
+        f.write(str(num_nodes) + "\n")
+        f.write(','.join([str(n) for n in sorted(solution_vertices)]))
+
+    with open(os.path.join(output_dir, trace_file), 'a') as f:
+        f.write(','.join([str(total_time), str(num_nodes)]))
+
     # print(runner.graph.edges)
 
 
@@ -342,6 +363,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Run algorithm with specified parameters')
     parser.add_argument('-inst', type=str, required=True, help='graph file')
+    parser.add_argument('-time', default=600, type=float,
+                        required=False, help='Cutoff running time for algorithm')
+    parser.add_argument('-seed', default=1000,
+                        type=int, required=False, help='Random Seed for algorithm')
+    parser.add_argument('-alg', default='LS2', type=str,
+                        required=False, help='Choice Algorithm')
     args = parser.parse_args()
 
-    main(args.inst)
+    main(args.inst, args.time, args.seed, args.alg)
