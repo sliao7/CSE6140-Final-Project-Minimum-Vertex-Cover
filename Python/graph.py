@@ -29,10 +29,14 @@ class vertex:
 class graph:
     # unweighted undirected graph
     # can be connected or not
-    def __init__(self):
+    edges = None
+    def __init__(self, edge_list = False):
         self.vert_dict = {} # vertex_id (int) : vertex
         self.num_vertices = 0
         self.num_edges = 0
+        
+        if edge_list:
+            self.edges = [] # list of edge tuples
 
     def __iter__(self):
         return iter(self.vert_dict.values())
@@ -60,12 +64,15 @@ class graph:
 
         self.vert_dict[frm].add_neighbor(self.vert_dict[to])
         self.vert_dict[to].add_neighbor(self.vert_dict[frm])
+        self.edges.append((frm, to))
 
 
     def remove_edge(self, frm, to):
         self.vert_dict[frm].remove_neighbor(self.vert_dict[to])
         self.vert_dict[to].remove_neighbor(self.vert_dict[frm])
         self.num_edges -= 1
+        if self.edges is not None:
+            self.edges = [e for e in self.edges if not e == (frm, to) and not e == (to, frm)]
 
 
     def get_vertices(self):
