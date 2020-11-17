@@ -64,7 +64,21 @@ class graph:
 
         self.vert_dict[frm].add_neighbor(self.vert_dict[to])
         self.vert_dict[to].add_neighbor(self.vert_dict[frm])
-        self.edges.append((frm, to))
+        if self.edges != None:
+            self.edges.append((frm, to))
+
+    def remove_vertex(self,node,inplace = False):
+        # remove vertex(node) in the graph and all the edges connected to it
+        G = self.copy() if not inplace else self
+        
+        for neighbor in list(G.vert_dict[node].get_connections()):
+            G.remove_edge(node, neighbor.id)
+            if not neighbor.get_connections():
+                # remove resulting isolated vertex
+                del G.vert_dict[neighbor.id]
+        del G.vert_dict[node]
+        
+        return G
 
 
     def remove_edge(self, frm, to):
@@ -78,6 +92,18 @@ class graph:
     def get_vertices(self):
         # return a list of ints, the id of vertices
         return list(self.vert_dict.keys())
+
+    def get_vertex_degree(self,node):
+        # return the degree of a vertex in the graph
+        return len(self.get_vertex(node).adjacent)
+
+    def copy(self):
+        # return a copy of the graph
+        copy = graph()
+        for v in self.vert_dict:
+            for u in self.vert_dict[v].get_connections():
+                copy.add_edge(v,u.id)
+        return copy
 
 
 
