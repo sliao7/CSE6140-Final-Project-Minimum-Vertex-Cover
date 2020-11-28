@@ -121,27 +121,34 @@ def Branch_and_Bound(G, start_time, cutoff):
     pqueue = [(num_uncov_edges0, node(vertices[0],None,LB,0)),(num_uncov_edges1,node(vertices[0],None,LB,1))]
     heapq.heapify(pqueue)
 
+    new_node0, new_node1 = None, None
+
     while pqueue and ((time.time() - start_time) < cutoff):
 
         # get the most promising decision node with the least number of uncovered edges, then the highest lower bound
         num_uncov_edges,Dnode = heapq.heappop(pqueue)
 
         parent = Dnode.parent
-        node_id = Dnode.id   
-            
-        # initialzie cover set Cprime and explored vertices     
-        Cprime = set([Dnode.id]) if Dnode.state else set() # vertices in the conver set
-        explored = set() if Dnode.state else set([Dnode.id]) # vertices explored but not in the cover set
+        node_id = Dnode.id  
 
-        # trace back the decision tree to find Cprime and explored
-        while parent:
-    
-            if parent.state:
-                Cprime.add(parent.id)
-            else:
-                explored.add(parent.id)
+        if Dnode == new_node1:
+            Cprime.add(new_node_id)
+        elif Dnode == new_node0:
+            explored.add(new_node_id)
+        else:           
+            # initialzie cover set Cprime and explored vertices     
+            Cprime = set([Dnode.id]) if Dnode.state else set() # vertices in the conver set
+            explored = set() if Dnode.state else set([Dnode.id]) # vertices explored but not in the cover set
 
-            parent = parent.parent
+            # trace back the decision tree to find Cprime and explored
+            while parent:
+        
+                if parent.state:
+                    Cprime.add(parent.id)
+                else:
+                    explored.add(parent.id)
+
+                parent = parent.parent
         
         # find V_prime from Cprime
         V_prime = Find_Vprime(G,Cprime)
@@ -224,7 +231,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run algorithm with specified parameters')
     parser.add_argument('-inst', type=str, required=True, help='graph file')
     parser.add_argument('-alg', type=str, required=True, help='algorithm to use')
-    parser.add_argument('-time', type=float, default=600, required=False, help='runtime cutoff for algorithm')
+    parser.add_argument('-time', type=float, default=60, required=False, help='runtime cutoff for algorithm')
     parser.add_argument('-seed', type=int, default=30, required=False, help='random seed for algorithm')
     args = parser.parse_args()
 
