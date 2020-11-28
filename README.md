@@ -6,7 +6,11 @@
 
 
 ## Branch-and-Bound 
-* Use Linear Programming relaxation to find a lower bound. See related [ Math Notes](http://theory.stanford.edu/~trevisan/cs261/lecture07.pdf) and [ Python Code](https://realpython.com/linear-programming-python/)
+* Used a 2-Approximation Algorithm to find the lower bound quickly
+* Applied Binary Decision Tree to loop through all possible vertex covers
+* Used a priority queue to find the most promising decision node to branch based on the degree of vertex in the remaining graph and the lowerbound of decision node
+
+* Note: can also apply Linear Programming relaxation to find a lower bound. See related [ Math Notes](http://theory.stanford.edu/~trevisan/cs261/lecture07.pdf) and [ Python Code](https://realpython.com/linear-programming-python/)
 
 ## Approximation 
 
