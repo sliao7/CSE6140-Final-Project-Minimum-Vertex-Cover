@@ -243,7 +243,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run algorithm with specified parameters')
     parser.add_argument('-inst', type=str, required=True, help='graph file')
     parser.add_argument('-alg', type=str, required=True, help='algorithm to use')
-    parser.add_argument('-time', type=float, default=60, required=False, help='runtime cutoff for algorithm')
+    parser.add_argument('-time', type=float, default=600, required=False, help='runtime cutoff for algorithm')
     parser.add_argument('-seed', type=int, default=30, required=False, help='random seed for algorithm')
     args = parser.parse_args()
 
