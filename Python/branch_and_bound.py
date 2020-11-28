@@ -90,7 +90,7 @@ class node:
         return self.lb > other.lb
          
 
-def Branch_and_Bound(G, start_time, cutoff):
+def Branch_and_Bound(G, start_time, cutoff, fo, upperBound):
     """
     Find min vertex using a branch and bound algorithm.
 
@@ -123,7 +123,7 @@ def Branch_and_Bound(G, start_time, cutoff):
 
     new_node0, new_node1 = None, None
 
-    while pqueue and ((time.time() - start_time) < cutoff):
+    while pqueue and ((time.time() - start_time) < cutoff) and opt_num > upperBound:
 
         # get the most promising decision node with the least number of uncovered edges, then the highest lower bound
         num_uncov_edges,Dnode = heapq.heappop(pqueue)
@@ -177,7 +177,8 @@ def Branch_and_Bound(G, start_time, cutoff):
                 # update solution
                 opt_num = cover_size
                 opt_cover = new_cover 
-                # print('Optimal:', opt_num)
+                fo.write(str(time.time() - start_time) + ',' + str(opt_num) + "\n")
+                print('Optimal:', opt_num)
                 continue
 
         
@@ -193,20 +194,31 @@ def Branch_and_Bound(G, start_time, cutoff):
             new_node0 = node(new_node_id, Dnode, Dnode.lb,0)
             heapq.heappush(pqueue, (num_uncov_edges, new_node0))
 
+    if opt_num == n:
+        fo.write(str(time.time() - start_time) + ',' + str(opt_num) + "\n")
+
     return opt_num, opt_cover
 
+opt_cutoff = {'karate':14, 'football':94, 'jazz':158, 'email':594, 'delaunay_n10':703,'netscience':899, 'power':2203,'as-22july06':3303,'hep-th':3926,'star2':4542,'star':6902}
 
 def main(graph, algo, cutoff, seed):
     G = parse_edges(graph)
     graph_name = graph.split('/')[-1].split('.')[0]
+
+    if graph_name not in opt_cutoff:
+        return
+
     sol_file = "_".join([graph_name, algo, str(cutoff)]) + '.sol'
     trace_file = "_".join([graph_name, algo, str(cutoff)]) + '.trace'
     output_dir = '../output/'
 
     start_time = time.time()
 
+    fo = open(os.path.join(output_dir, trace_file), 'w')
+
     if algo == 'BnB':
-        num_vc_nodes, vc = Branch_and_Bound(G, start_time, cutoff)
+        num_vc_nodes, vc = Branch_and_Bound(G, start_time, cutoff, fo, opt_cutoff[graph_name])
+        fo.close()
 
 
     total_time = round((time.time() - start_time), 5)
@@ -221,9 +233,9 @@ def main(graph, algo, cutoff, seed):
         f.write(','.join([str(n) for n in sorted(vc)]))
     f.close()
 
-    with open(os.path.join(output_dir, trace_file), 'w') as f:
-        f.write(' '.join([str(total_time), str(num_vc_nodes)]))
-    f.close()
+    # with open(os.path.join(output_dir, trace_file), 'w') as f:
+    # f.write(' '.join([str(total_time), str(num_vc_nodes)]))
+    # f.close()
 
 # Run as executable from terminal
 if __name__ == '__main__':
@@ -231,7 +243,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run algorithm with specified parameters')
     parser.add_argument('-inst', type=str, required=True, help='graph file')
     parser.add_argument('-alg', type=str, required=True, help='algorithm to use')
-    parser.add_argument('-time', type=float, default=600, required=False, help='runtime cutoff for algorithm')
+    parser.add_argument('-time', type=float, default=60, required=False, help='runtime cutoff for algorithm')
     parser.add_argument('-seed', type=int, default=30, required=False, help='random seed for algorithm')
     args = parser.parse_args()
 
