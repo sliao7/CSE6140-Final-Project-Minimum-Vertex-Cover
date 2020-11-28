@@ -178,7 +178,7 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound):
                 opt_num = cover_size
                 opt_cover = new_cover 
                 fo.write(str(time.time() - start_time) + ',' + str(opt_num) + "\n")
-                print('Optimal:', opt_num)
+                # print('Optimal:', opt_num)
                 continue
 
         
