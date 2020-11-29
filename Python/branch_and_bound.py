@@ -41,13 +41,12 @@ def approx2(G,seed):
     for v in shuffled_vertices:
         if v in S:
             continue
-        for neighbor in v.get_connections():
-            
-            if neighbor.id < v.id:
-                continue
+
+        for neighbor in v.get_connections():        
             if v.id not in S and neighbor.id not in S:
                 S.add(v.id)
                 S.add(neighbor.id)
+
     return S, len(S) # dividing the result by 2 gives us a lower bound of the minimum vertex cover of G
 
 
@@ -203,9 +202,6 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
             new_node0 = node(new_node_id, Dnode, Dnode.lb,0)
             heapq.heappush(pqueue, (num_uncov_edges, new_node0))
 
-    # if opt_num == n:
-    #     fo.write(str(time.time() - start_time) + ',' + str(opt_num) + "\n")
-
     return opt_num, opt_cover
 
 opt_cutoff = {'karate':14, 'football':94, 'jazz':158, 'email':594, 'delaunay_n10':703,'netscience':899, 'power':2203,'as-22july06':3303,'hep-th':3926,'star2':4542,'star':6902}
@@ -242,9 +238,6 @@ def main(graph, algo, cutoff, seed):
         f.write(','.join([str(n) for n in sorted(vc)]))
     f.close()
 
-    # with open(os.path.join(output_dir, trace_file), 'w') as f:
-    # f.write(' '.join([str(total_time), str(num_vc_nodes)]))
-    # f.close()
 
 # Run as executable from terminal
 if __name__ == '__main__':
