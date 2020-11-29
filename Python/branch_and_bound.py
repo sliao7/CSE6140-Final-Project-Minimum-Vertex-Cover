@@ -205,7 +205,7 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
                 deadend = True
                 break
 
-        if not deadend and Dnode.lb < opt_num:
+        if not deadend and LowerBound - 1 < opt_num:
             new_node0 = node(new_node_id, Dnode, Dnode.lb,0)
             heapq.heappush(pqueue, (num_uncov_edges, new_node0))
 
