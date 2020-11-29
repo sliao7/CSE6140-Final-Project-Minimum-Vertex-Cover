@@ -5,6 +5,7 @@ import os
 import heapq
 from collections import deque,defaultdict
 import argparse
+import random
 from graph import graph
 
 # read data and construct a graph object
@@ -27,12 +28,16 @@ def parse_edges(filename):
 
     return G 
 
-def approx2(G):
+def approx2(G,seed):
     # G: a graph object
     # return: the number of vertices of a 2-approximation solution to the min vertex cover problem of G
-
+    
     S = set()
-    for v in G:
+
+    shuffled_vertices = list(G.vert_dict.values())
+    random.shuffle(shuffled_vertices)
+
+    for v in shuffled_vertices:
         if v in S:
             continue
         for neighbor in v.get_connections():
@@ -42,7 +47,7 @@ def approx2(G):
             if v.id not in S and neighbor.id not in S:
                 S.add(v.id)
                 S.add(neighbor.id)
-    return len(S) # dividing the result by 2 gives us a lower bound of the minimum vertex cover of G
+    return S, len(S) # dividing the result by 2 gives us a lower bound of the minimum vertex cover of G
 
 
 def Find_Vprime(G, Cprime):
@@ -90,7 +95,7 @@ class node:
         return self.lb > other.lb
          
 
-def Branch_and_Bound(G, start_time, cutoff, fo, upperBound):
+def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
     """
     Find min vertex using a branch and bound algorithm.
 
@@ -104,11 +109,14 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound):
     # sort vertices in degree 
     vertices.sort(key = lambda x: -len(G.get_vertex(x).adjacent)) 
 
-    opt_cover = vertices
-    opt_num = n
+    opt_cover, opt_num = approx2(G, seed)
+
+    fo.write(str(time.time() - start_time) + ',' + str(opt_num) + "\n")
+    # opt_cover = vertices
+    # opt_num = n
 
     # initial lowerbound
-    LB = approx2(G) / 2   
+    LB = opt_num / 2   
 
     # to get the order of vertex using vertex id
     vertices_order = {vertex: i for i, vertex in enumerate(vertices)}
@@ -182,7 +190,7 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound):
                 continue
 
         
-        LowerBound = cover_size + approx2(G_prime)//2
+        LowerBound = cover_size + approx2(G_prime, seed)[1]//2
 
         if LowerBound < opt_num:
             new_node1 = node(new_node_id, Dnode, LowerBound,1)
@@ -194,8 +202,8 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound):
             new_node0 = node(new_node_id, Dnode, Dnode.lb,0)
             heapq.heappush(pqueue, (num_uncov_edges, new_node0))
 
-    if opt_num == n:
-        fo.write(str(time.time() - start_time) + ',' + str(opt_num) + "\n")
+    # if opt_num == n:
+    #     fo.write(str(time.time() - start_time) + ',' + str(opt_num) + "\n")
 
     return opt_num, opt_cover
 
@@ -217,7 +225,7 @@ def main(graph, algo, cutoff, seed):
     fo = open(os.path.join(output_dir, trace_file), 'w')
 
     if algo == 'BnB':
-        num_vc_nodes, vc = Branch_and_Bound(G, start_time, cutoff, fo, opt_cutoff[graph_name])
+        num_vc_nodes, vc = Branch_and_Bound(G, start_time, cutoff, fo, opt_cutoff[graph_name], seed)
         fo.close()
 
 
