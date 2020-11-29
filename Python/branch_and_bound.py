@@ -92,7 +92,7 @@ class node:
         self.state = state # state == 1 if we consider including vertex(id) in the vertex cover
     
     def __lt__(self, other): 
-        return self.lb > other.lb
+        return self.lb < other.lb
          
 
 def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
@@ -198,7 +198,14 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
     
 
         # Branch 2: don't add vertex(new_node_id) to the cover set
-        if Dnode.lb < opt_num:
+        # check deadend
+        deadend = False
+        for new_node_neigh in G.get_vertex(new_node_id).get_connections():
+            if new_node_neigh.id in explored:
+                deadend = True
+                break
+
+        if not deadend and Dnode.lb < opt_num:
             new_node0 = node(new_node_id, Dnode, Dnode.lb,0)
             heapq.heappush(pqueue, (num_uncov_edges, new_node0))
 
