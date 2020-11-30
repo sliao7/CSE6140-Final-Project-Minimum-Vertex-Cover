@@ -8,7 +8,7 @@ import argparse
 
 import random
 import numpy as np
-from time import time
+import time
 
 import os
 
@@ -165,7 +165,7 @@ class manual_runner():
         toolbox.register("select", tools.selTournament, tournsize=3)
         # toolbox.register("select", tools.selRandom)
 
-        s = time()
+        s = time.time()
         seeds = [creator.Individual([1 for i in range(NUM_VERTICES)])]
 
         bar = 1.0 - (1./NUM_VERTICES)
@@ -204,7 +204,7 @@ class manual_runner():
         stagnant = 0
         # Begin the evolution
         # while g < NGEN and time() - s < 595 and (stagnant < 1000 or True):
-        while g < NGEN and time() - s < cutoff - 2 and stagnant < 1000:
+        while g < NGEN and time.time() - s < cutoff - 2 and stagnant < 1000:
             # A new generation
             g = g + 1
             if g % 10 == 0 and verbose:
@@ -262,12 +262,12 @@ class manual_runner():
             std = abs(sum2 / length - mean**2)**0.5
             if overall_best is None or overall_best.fitness.values[0] < max(fits):
                 stagnant = 0
-                total_time = round((time() - s), 2)
+                total_time = round((time.time() - s), 2)
                 overall_best = tools.selBest(pop, 1)[0]
                 if trace_path is not None:
                     with open(trace_path, 'a') as f:
                         f.write(
-                            ','.join([str(time() - start), str(sum(overall_best))]) + "\n")
+                            ','.join([str(time.time() - start), str(sum(overall_best))]) + "\n")
             else:
                 stagnant += 1
 
@@ -286,7 +286,7 @@ class manual_runner():
                   (overall_best, overall_best.fitness.values))
         self.best = best_ind
         self.overall_best = overall_best
-        e = time()
+        e = time.time()
         if verbose:
             print(f"Time: {e - s}s")
 
@@ -325,7 +325,7 @@ class manual_runner():
 
 def main(graph_name, cutoff, seed, algo, verbose=False):
     random.seed(seed)
-    s = time()
+    s = time.time()
     graph_path = graph_name.split('/')[-1].split('.')[0]
     sol_file = "_".join([graph_path, algo, str(cutoff)]) + '.sol'
 
@@ -337,7 +337,7 @@ def main(graph_name, cutoff, seed, algo, verbose=False):
     pop_size = 3 * len(runner.graph.vert_dict)
     best_ind = runner.run_test(MU=pop_size,
                                MUTPB=0.1, CXPB=0.001, NGEN=1000, verbose=verbose, cutoff=cutoff, trace_path=os.path.join(output_dir, trace_file), start=s)
-    total_time = round((time() - s), 2)
+    total_time = round((time.time() - s), 2)
     num_nodes = sum(best_ind)
     solution_vertices = runner.sorted_vertex_ids(best_ind)
     if verbose:
