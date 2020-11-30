@@ -7,6 +7,7 @@ from collections import deque,defaultdict
 import argparse
 import random
 from graph import graph
+from approx import mdg
 
 # read data and construct a graph object
 def parse_edges(filename):
@@ -103,30 +104,24 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
 
     Input: a networkx undirected graph
     Returns: the minimum vertex cover
-    """
-    n = G.num_vertices   
-    vertices = G.get_vertices()
-    # sort vertices in degree 
-    vertices.sort(key = lambda x: -len(G.get_vertex(x).adjacent)) 
+    """  
 
     opt_cover, opt_num = approx2(G, seed)
-
-    fo.write(str(time.time() - start_time) + ',' + str(opt_num) + "\n")
-    # opt_cover = vertices
-    # opt_num = n
+    fo.write(str(time.time() - start_time) + ',' + str(opt_num) + "\n")    
 
     # initial lowerbound
-    LB = opt_num / 2   
+    LB = opt_num // 2   
 
-    # to get the order of vertex using vertex id
-    vertices_order = {vertex: i for i, vertex in enumerate(vertices)}
+    # initial vertex to consider
+    first_vertex = find_next(G.get_vertices(), G, set())
+
 
     # number of uncovered edges
     num_uncov_edges0 = G.num_edges # not selecting the vertex[vertices_order[0]]
-    num_uncov_edges1 = G.num_edges - G.get_vertex_degree(vertices[0]) # selecting the vertex[vertices_order[0]]
+    num_uncov_edges1 = G.num_edges - G.get_vertex_degree(first_vertex) # selecting the vertex[vertices_order[0]]
 
     # initialize priority queue with the first two decision nodes and their corresponding number of uncovered edges
-    pqueue = [(num_uncov_edges0, node(vertices[0],None,LB,0)),(num_uncov_edges1,node(vertices[0],None,LB,1))]
+    pqueue = [(num_uncov_edges0, node(first_vertex,None,LB,0)),(num_uncov_edges1,node(first_vertex,None,LB,1))]
     heapq.heapify(pqueue)
 
     new_node0, new_node1 = None, None
@@ -187,9 +182,9 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
                 opt_cover = new_cover 
                 fo.write(str(time.time() - start_time) + ',' + str(opt_num) + "\n")
                 # print('Optimal:', opt_num)
-                continue
+            continue
 
-        
+        # LowerBound = cover_size + mdg(G_prime,start_time,cutoff//100)//2
         LowerBound = cover_size + approx2(G_prime, seed)[1]//2
 
         if LowerBound < opt_num:
