@@ -217,7 +217,7 @@ def main(graph, algo, cutoff, seed):
 
     sol_file = "_".join([graph_name, algo, str(cutoff)]) + '.sol'
     trace_file = "_".join([graph_name, algo, str(cutoff)]) + '.trace'
-    output_dir = '../output/'
+    output_dir = './BnB_output/'
 
     start_time = time.time()
 
@@ -243,7 +243,8 @@ def main(graph, algo, cutoff, seed):
 
 # Run as executable from terminal
 if __name__ == '__main__':
-    #parse arguments in the following format: python code/approx.py -inst DATA/jazz.graph -alg approx -time 600 -seed 30
+    #parse arguments in the following format: 
+    # python Python/BnB.py -inst DATA/jazz.graph -alg BnB -time 600 -seed 30
     parser = argparse.ArgumentParser(description='Run algorithm with specified parameters')
     parser.add_argument('-inst', type=str, required=True, help='graph file')
     parser.add_argument('-alg', type=str, required=True, help='algorithm to use')

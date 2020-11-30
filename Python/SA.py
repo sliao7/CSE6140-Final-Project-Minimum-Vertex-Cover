@@ -12,9 +12,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
-opt_cutoff = {'DATA/karate.graph':14, 'DATA/football.graph':94, 'DATA/jazz.graph':158, 'DATA/email.graph':594, 'DATA/delaunay_n10.graph':703,'DATA/netscience.graph':899, 'DATA/power.graph':2203,'DATA/as-22july06.graph':3303,'DATA/hep-th.graph':3926,'DATA/star2.graph':4542,'DATA/star.graph':6902}
-
-class RunExperiments:
+class SA:
 
     def parse_edges(self, filename):
         G = nx.Graph()
@@ -77,7 +75,7 @@ class RunExperiments:
 
             cost_new = len(uncov_new)
             cost_old = len(uncov_old)
-            if cost_curr < cost_sol: 
+            if cost_new < cost_old: 
                 prob = math.exp(float(cost_new - cost_old)/float(temp))
                 num = round(random.uniform(0,1),10)
                 if num > prob:    
