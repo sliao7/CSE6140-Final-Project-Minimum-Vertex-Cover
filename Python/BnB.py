@@ -51,33 +51,14 @@ def approx2(G,seed):
     return S, len(S) # dividing the result by 2 gives us a lower bound of the minimum vertex cover of G
 
 
-def Find_Vprime(G, Cprime):
-    'Cprime: a list of numbers in {1, 2, ..., n}'
-    'Return: a set of vertices Vprime of the graph Gprime'
-    Vprime = set()
-#     Cprime = set(Cprime)
-    
-    for node in G.get_vertices():
-        if node in Cprime:
-            continue
-            
-        for neighbor in G.get_vertex(node).adjacent:
-            if neighbor.id not in Cprime:
-                Vprime.add(node)
-                break
-    return Vprime
-
-
-def Gprime(G,Vprime):
-    'Construct graph Gprime from Vprime'
-    G_prime = graph()
-    for node in Vprime:
-        for neighbor in G.get_vertex(node).adjacent:
-            if neighbor.id > node and neighbor.id in Vprime:
-                G_prime.add_edge(node,neighbor.id)
+def Gprime(G, Cprime):
+    G_prime = G.copy()
+    for v in Cprime:
+        G_prime = G_prime.remove_vertex(v,inplace = True)
     return G_prime
 
-def find_next(V_prime, G_prime, Explored):
+def find_next(G_prime, Explored):
+    V_prime = G_prime.get_vertices()
     for v in sorted(V_prime, key = lambda x: - G_prime.get_vertex_degree(x)):
         if v not in Explored:
             return v
@@ -113,7 +94,7 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
     LB = opt_num // 2   
 
     # initial vertex to consider
-    first_vertex = find_next(G.get_vertices(), G, set())
+    first_vertex = find_next(G, set())
 
 
     # number of uncovered edges
@@ -138,6 +119,7 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
 
         if Dnode == new_node1:
             Cprime.add(new_node_id)
+            G_prime = G_prime1
         elif Dnode == new_node0:
             explored.add(new_node_id)
         else:           
@@ -155,14 +137,10 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
 
                 parent = parent.parent
         
-        if not Dnode == new_node1:
-            # find V_prime from Cprime
-            V_prime = Find_Vprime(G,Cprime)
-            # construct G_prime from V_prime
-            G_prime = Gprime(G, V_prime)
+            G_prime = Gprime(G, Cprime)
         
         # find the vertex with the highest degree in G_prime that has not been explored
-        new_node_id = find_next(V_prime, G_prime, explored)
+        new_node_id = find_next(G_prime, explored)
         
 
         if not new_node_id:
@@ -174,10 +152,9 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
         cover_size = len(Cprime) + 1  
         new_cover = Cprime.union(set([new_node_id]))
     
-        G_prime = G_prime.remove_vertex(new_node_id,inplace = True)
-        V_prime = G_prime.get_vertices()
+        G_prime1 = G_prime.remove_vertex(new_node_id,inplace = True)
    
-        if not V_prime:
+        if not G_prime1.get_vertices():
             # solution found
             if cover_size < opt_num:
                 # update solution
@@ -187,8 +164,8 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
                 # print('Optimal:', opt_num)
             continue
 
-        # LowerBound = cover_size + mdg(G_prime,start_time,cutoff//100)//2
-        LowerBound = cover_size + approx2(G_prime, seed)[1]//2
+        
+        LowerBound = cover_size + approx2(G_prime1, seed)[1]//2
 
         if LowerBound < opt_num:
             new_node1 = node(new_node_id, Dnode, LowerBound,1)
