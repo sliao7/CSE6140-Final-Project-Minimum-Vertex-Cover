@@ -126,6 +126,7 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
 
     new_node0, new_node1 = None, None
 
+
     while pqueue and ((time.time() - start_time) < cutoff) and opt_num > upperBound:
 
         # get the most promising decision node with the least number of uncovered edges, then the highest lower bound
@@ -133,6 +134,7 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
 
         parent = Dnode.parent
         node_id = Dnode.id  
+
 
         if Dnode == new_node1:
             Cprime.add(new_node_id)
@@ -153,10 +155,11 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
 
                 parent = parent.parent
         
-        # find V_prime from Cprime
-        V_prime = Find_Vprime(G,Cprime)
-        # construct G_prime from V_prime
-        G_prime = Gprime(G, V_prime)
+        if not Dnode == new_node1:
+            # find V_prime from Cprime
+            V_prime = Find_Vprime(G,Cprime)
+            # construct G_prime from V_prime
+            G_prime = Gprime(G, V_prime)
         
         # find the vertex with the highest degree in G_prime that has not been explored
         new_node_id = find_next(V_prime, G_prime, explored)
