@@ -6,7 +6,9 @@ import GA
 import time
 import os
 import argparse
-opt_cutoff = {'karate':14, 'football':94, 'jazz':158, 'email':594, 'delaunay_n10':703,'netscience':899, 'power':2203,'as-22july06':3303,'hep-th':3926,'star2':4542,'star':6902}
+opt_cutoff = {'karate': 14, 'football': 94, 'jazz': 158, 'email': 594, 'delaunay_n10': 703,
+              'netscience': 899, 'power': 2203, 'as-22july06': 3303, 'hep-th': 3926, 'star2': 4542, 'star': 6902}
+
 
 def main(graph, algo, cutoff, seed):
 
@@ -27,9 +29,10 @@ def main(graph, algo, cutoff, seed):
     if algo == 'BnB':
         if graph_name not in opt_cutoff:
             return
-        
+
         G = BnB.parse_edges(graph)
-        num_vc_nodes, vc = BnB.Branch_and_Bound(G, start_time, cutoff, fo, opt_cutoff[graph_name], seed)
+        num_vc_nodes, vc = BnB.Branch_and_Bound(
+            G, start_time, cutoff, fo, opt_cutoff[graph_name], seed)
         fo.close()
 
         total_time = round((time.time() - start_time), 5)
@@ -45,10 +48,13 @@ def main(graph, algo, cutoff, seed):
         G, nV, nE = sa_obj.parse_edges(graph)
 
         G_init = G.copy()
-        sol = sa_obj.initial_solution(G=G_init, fo=fo, start_time=start_time, cutoff=cutoff, input_file=graph)
-        final_solution = sa_obj.simulate_annealing(G, fo, sol, cutoff, nV, start_time, graph, opt_cutoff.get(graph_name, 10))
+        sol = sa_obj.initial_solution(
+            G=G_init, fo=fo, start_time=start_time, cutoff=cutoff, input_file=graph)
+        final_solution = sa_obj.simulate_annealing(
+            G, fo, sol, cutoff, nV, start_time, graph, opt_cutoff.get(graph_name, 10))
         fo.close()
-        print('SA Solution: ({}) {}'.format(len(final_solution), final_solution))
+        print('SA Solution: ({}) {}'.format(
+            len(final_solution), final_solution))
 
         total_time = round((time.time() - start_time), 5)
         print('SA Runtime (s): {}'.format(total_time))
@@ -79,7 +85,7 @@ def main(graph, algo, cutoff, seed):
 
         pop_size = 3 * len(runner.graph.vert_dict)
         best_ind = runner.run_test(MU=pop_size,
-                                   MUTPB=0.1, CXPB=0.001, NGEN=1000, verbose=False, cutoff=cutoff, trace_path=os.path.join(output_dir, trace_file), start=start_time)
+                                   MUTPB=0.07, CXPB=0.8, NGEN=2000, verbose=False, cutoff=cutoff, trace_path=os.path.join(output_dir, trace_file), start=start_time)
         total_time = round((time.time() - start_time), 5)
         print('GA Runtime: ' + str(total_time))
         num_nodes = sum(best_ind)
@@ -95,14 +101,18 @@ def main(graph, algo, cutoff, seed):
 
 # Run as executable from terminal
 if __name__ == '__main__':
-    # parse arguments in the following format: 
+    # parse arguments in the following format:
     # python Python/main.py -inst DATA/email.graph -alg approx -time 600 -seed 30
 
-    parser = argparse.ArgumentParser(description='Run algorithm with specified parameters')
+    parser = argparse.ArgumentParser(
+        description='Run algorithm with specified parameters')
     parser.add_argument('-inst', type=str, required=True, help='graph file')
-    parser.add_argument('-alg', type=str, required=True, help='algorithm to use')
-    parser.add_argument('-time', type=float, default=600, required=False, help='runtime cutoff for algorithm')
-    parser.add_argument('-seed', type=int, default=30, required=False, help='random seed for algorithm')
+    parser.add_argument('-alg', type=str, required=True,
+                        help='algorithm to use')
+    parser.add_argument('-time', type=float, default=600,
+                        required=False, help='runtime cutoff for algorithm')
+    parser.add_argument('-seed', type=int, default=30,
+                        required=False, help='random seed for algorithm')
     args = parser.parse_args()
 
     main(args.inst, args.alg, args.time, args.seed)

@@ -138,7 +138,7 @@ class manual_runner():
         self.vertex_to_ids = {i: k for i,
                               k in enumerate(self.graph.vert_dict.keys())}
 
-    def create_individual(self, bar=0.8):
+    def create_individual(self, bar=0.1):
         NUM_VERTICES = len(self.graph.get_vertices())
         return [1 if random.random() < bar else 0 for i in range(NUM_VERTICES)]
 
@@ -162,7 +162,7 @@ class manual_runner():
                          indpb=(1.0/NUM_VERTICES))
         toolbox.register("mutateShuffle", tools.mutShuffleIndexes,
                          indpb=(1.0/NUM_VERTICES))
-        toolbox.register("select", tools.selTournament, tournsize=3)
+        toolbox.register("select", tools.selTournament, tournsize=5)
         # toolbox.register("select", tools.selRandom)
 
         s = time.time()
@@ -174,17 +174,17 @@ class manual_runner():
         # for i in range(100):
         #     pop.append(creator.Individual(
         #         [1 if c != i else 0 for c in range(NUM_VERTICES)]))
-        num_individuals = max(NUM_VERTICES // 500, 100)
+        num_individuals = max(NUM_VERTICES // 100, 100)
+        num_individuals = min(num_individuals, 1000)
         for i in range(num_individuals):
             pop.append(creator.Individual(
                 [1 if c != i else 0 for c in range(NUM_VERTICES)]))
         for i in range(num_individuals):
             pop.append(creator.Individual(self.create_individual()))
-        # for i in range(NUM_VERTICES):
-        #     pop.append(creator.Individual(self.create_individual()))
-        # for m in range(MU-1):
-        #     pop.append(creator.Individual(
-        #         [1 if random.random() < bar else 0 for i in range(NUM_VERTICES)]))
+
+        num_best = len(pop) // 10
+        toolbox.register("selectElite", tools.selBest, k=num_best)
+
         if verbose:
             print("Start of evolution")
 
@@ -209,6 +209,8 @@ class manual_runner():
             g = g + 1
             if g % 10 == 0 and verbose:
                 print("-- Generation %i --" % g)
+            if g % 100 == 0 and verbose:
+                print(len(pop))
 
             # Select the next generation individuals
             offspring = toolbox.select(pop, len(pop))
@@ -242,6 +244,9 @@ class manual_runner():
                     toolbox.mutateShuffle(mutant)
                     del mutant.fitness.values
 
+            offspring.extend(toolbox.selectElite(pop))
+            offspring.extend(
+                [creator.Individual(self.create_individual()) for i in range(num_best)])
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             fitnesses = map(toolbox.evaluate, invalid_ind)
             for ind, fit in zip(invalid_ind, fitnesses):
@@ -249,9 +254,8 @@ class manual_runner():
 
             if g % 10 == 0 and verbose:
                 print("  Evaluated %i individuals" % len(invalid_ind))
-
             # The population is entirely replaced by the offspring
-            pop[:] = offspring
+            pop[:] = toolbox.select(offspring, len(pop))
 
             # Gather all the fitnesses in one list and print the stats
             fits = [ind.fitness.values[0] for ind in pop]
@@ -273,7 +277,7 @@ class manual_runner():
 
             if g % 10 == 0 and verbose:
                 print(
-                    f"  Min {min(fits):.2f} \t Max {max(fits):.2f} \t Avg {mean:.2f} \t std: {std:.2f}")
+                    f"  Score: {sum(overall_best)} \t Min {min(fits):.2f} \t Max {max(fits):.2f} \t Avg {mean:.2f} \t std: {std:.2f}")
 
         if verbose:
             print("-- End of (successful) evolution --")
@@ -309,9 +313,8 @@ class manual_runner():
         for e in self.graph.edges:
             if e[0] in verts or e[1] in verts:
                 score += 1
-            else:
-                # print(f"{e[0]}-{e[1]} - {e[0] in verts} {e[1] in verts}")
-                bad += 1
+            # else:
+            #     bad += 1
         if score != len(self.graph.edges):
             # print(f"{score} vs {len(self.graph.edges)}")
             # return (-1 * bad,)
