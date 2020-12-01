@@ -37,7 +37,7 @@ def approx2(G,seed):
 
     shuffled_vertices = list(G.vert_dict.values())
     
-    random.Random(seed).shuffle(shuffled_vertices)
+    # random.Random(seed).shuffle(shuffled_vertices)
 
     for v in shuffled_vertices:
         if v in S:
@@ -200,7 +200,7 @@ def Branch_and_Bound(G, start_time, cutoff, fo, upperBound, seed):
                 deadend = True
                 break
 
-        if not deadend and LowerBound - 1 < opt_num:
+        if not deadend and Dnode.lb < opt_num:
             new_node0 = node(new_node_id, Dnode, Dnode.lb,0)
             heapq.heappush(pqueue, (num_uncov_edges, new_node0))
 
@@ -221,6 +221,10 @@ def main(graph, algo, cutoff, seed):
 
     start_time = time.time()
 
+    # Create output directory if it does not exist
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     fo = open(os.path.join(output_dir, trace_file), 'w')
 
     if algo == 'BnB':
@@ -231,9 +235,7 @@ def main(graph, algo, cutoff, seed):
     total_time = round((time.time() - start_time), 5)
     print('BnB Algo Runtime: ' + str(total_time))
 
-    # Create output directory if it does not exist
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    
 
     with open(os.path.join(output_dir, sol_file), 'w') as f:
         f.write(str(num_vc_nodes) + "\n")
