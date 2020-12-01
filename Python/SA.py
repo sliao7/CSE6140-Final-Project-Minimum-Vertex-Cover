@@ -57,6 +57,7 @@ class SA:
                         uncov_old.append(delete)
                 sol.remove(delete)     
 
+            # del node
             current = sol.copy()
             uncov_new = uncov_old.copy()
             delete = random.choice(sol)
@@ -66,6 +67,7 @@ class SA:
                     uncov_old.append(delete)            
             sol.remove(delete)   
 
+            # add node
             enter = random.choice(uncov_old)
             sol.append(enter)
             for x in G.neighbors(enter):
