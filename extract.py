@@ -6,26 +6,26 @@ opt_cutoff = {'karate':14, 'football':94, 'jazz':158, 'email':594, 'delaunay':70
 record_time, record_nV = {}, {}
 for fn in glob.glob('./{}_output/*'.format('SA')):
 
-	fin = open(fn, 'r').readlines()
-	name = fn.split('/')[-1].split('_')[0]
-	try:
-		time, nV = fin[-1].split()[0].split(',')
-	except:
-		print (fn)
-		continue
+    fin = open(fn, 'r').readlines()
+    name = fn.split('/')[-1].split('_')[0]
+    try:
+        time, nV = fin[-1].split()[0].split(',')
+    except:
+        print (fn)
+        continue
 
-	time, nV = float(time), float(nV)
-	if name not in record_time:
-		record_time[name] = [time]
-		record_nV[name] = [nV]
-	else:
-		record_time[name].append(time)
-		record_nV[name].append(nV)
+    time, nV = float(time), float(nV)
+    if name not in record_time:
+        record_time[name] = [time]
+        record_nV[name] = [nV]
+    else:
+        record_time[name].append(time)
+        record_nV[name].append(nV)
 
 for key in record_time.keys():
-	opt_nv = opt_cutoff.get('{}'.format(key), 1e-15)
-	err = (np.mean(record_nV[key]) - opt_nv)/opt_nv
-	print ('{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(key, 
-								   np.mean(record_time[key]), np.std(record_time[key]), 
-								   np.mean(record_nV[key]), np.std(record_nV[key]), err, opt_nv))
+    opt_nv = opt_cutoff.get('{}'.format(key), 1e-15)
+    err = (np.mean(record_nV[key]) - opt_nv)/opt_nv
+    print ('{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(key, 
+                                   np.mean(record_time[key]), np.std(record_time[key]), 
+                                   np.mean(record_nV[key]), np.std(record_nV[key]), err, opt_nv))
 # import pdb;pdb.set_trace()

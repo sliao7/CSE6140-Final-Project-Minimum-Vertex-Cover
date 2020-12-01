@@ -45,7 +45,7 @@ class SA:
         update_sol = sol.copy()
         uncov_old = []
         num_eges= G.number_of_edges()
-        while ((time.time() - start_time) < cutoff and len(update_sol) > upperBound):
+        while ((time.time() - start_time) < cutoff):
             temp = 0.95 * temp 
             while not uncov_old:
                 update_sol = sol.copy()
