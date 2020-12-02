@@ -44,7 +44,7 @@ class SA:
         update_sol = sol.copy()
         uncov_old = []
         num_eges= G.number_of_edges()
-        while ((time.time() - start_time) < cutoff and len(update_sol) > upperBound):
+        while ((time.time() - start_time) < cutoff):
             temp = 0.95 * temp 
             while not uncov_old:
                 update_sol = sol.copy()
@@ -56,6 +56,7 @@ class SA:
                         uncov_old.append(delete)
                 sol.remove(delete)     
 
+            # del node
             current = sol.copy()
             uncov_new = uncov_old.copy()
             delete = random.choice(sol)
@@ -65,6 +66,7 @@ class SA:
                     uncov_old.append(delete)            
             sol.remove(delete)   
 
+            # add node
             enter = random.choice(uncov_old)
             sol.append(enter)
             for x in G.neighbors(enter):

@@ -6,16 +6,18 @@ import GA
 import time
 import os
 import argparse
-opt_cutoff = {'karate': 14, 'football': 94, 'jazz': 158, 'email': 594, 'delaunay_n10': 703,
-              'netscience': 899, 'power': 2203, 'as-22july06': 3303, 'hep-th': 3926, 'star2': 4542, 'star': 6902}
+import random
+
+opt_cutoff = {'karate':14, 'football':94, 'jazz':158, 'email':594, 'delaunay_n10':703,'netscience':899, 'power':2203,'as-22july06':3303,'hep-th':3926,'star2':4542,'star':6902}
 
 
 def main(graph, algo, cutoff, seed):
+    random.seed(seed)
 
     graph_name = graph.split('/')[-1].split('.')[0]
 
-    sol_file = "_".join([graph_name, algo, str(cutoff)]) + '.sol'
-    trace_file = "_".join([graph_name, algo, str(cutoff)]) + '.trace'
+    sol_file = "_".join([graph_name, algo, str(cutoff), str(seed)]) + '.sol'
+    trace_file = "_".join([graph_name, algo, str(cutoff), str(seed)]) + '.trace'
     output_dir = './{}_output/'.format(algo)
 
     start_time = time.time()
