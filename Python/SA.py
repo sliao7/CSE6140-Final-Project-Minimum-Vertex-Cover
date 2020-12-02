@@ -40,11 +40,11 @@ class SA:
         return temp_G
 
     def simulate_annealing(self, G, fo, sol, cutoff, nV, start_time, input_file, upperBound):
-        temp = 0.15     
+        temp = 0.8   
         update_sol = sol.copy()
         uncov_old = []
         num_eges= G.number_of_edges()
-        while ((time.time() - start_time) < cutoff):
+        while ((time.time() - start_time) < cutoff and len(update_sol) > upperBound):
             temp = 0.95 * temp 
             while not uncov_old:
                 update_sol = sol.copy()
