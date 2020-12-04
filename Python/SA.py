@@ -1,7 +1,4 @@
 #!/usr/bin/python
-# CSE6140 proj
-# This is an example of how your experiments should look like.
-# Feel free to use and modify the code below, or write your own experimental code, as long as it produces the desired output.
 import time
 import sys
 
