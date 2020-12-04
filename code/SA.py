@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # Simulated Annealing (SA) is used to approximate the global optimal of the target function, 
 # it is proposed based on the idea of the physical process of annealing.
-
 import time
 import sys
 
@@ -59,7 +58,9 @@ class SA:
                         S_best.append(delete_v)
                 S.remove(delete_v)     
 
+
             # del node
+
             S_current = S.copy()
             uncovered_S = S_best.copy()
             delete_v = random.choice(S)
@@ -69,7 +70,9 @@ class SA:
                     S_best.append(delete_v)            
             S.remove(delete_v)   
 
+
             # add node
+
             add_v = random.choice(S_best)
             S.append(add_v)
             for v in G.neighbors(add_v):
