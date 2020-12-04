@@ -40,7 +40,9 @@ class SA:
         T = 0.8   
         S_ret = S.copy()
         S_best = []
-        while ((time.time() - start_time) < cutoff):
+
+        while ((time.time() - start_time) < cutoff and len(S_ret) > upperBound):
+
             T = 0.95 * T 
             while not S_best:
                 S_ret = S.copy()
@@ -51,7 +53,10 @@ class SA:
                         S_best.append(v)
                         S_best.append(delete_v)
                 S.remove(delete_v)     
-                
+
+
+            # del node
+
             S_current = S.copy()
             uncovered_S = S_best.copy()
             delete_v = random.choice(S)
@@ -60,6 +65,9 @@ class SA:
                     S_best.append(v)
                     S_best.append(delete_v)            
             S.remove(delete_v)   
+
+
+            # add node
 
             add_v = random.choice(S_best)
             S.append(add_v)
