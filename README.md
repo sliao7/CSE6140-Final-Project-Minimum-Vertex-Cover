@@ -14,6 +14,10 @@ To test and run this code, you will need the following:
 ```
 python -inst <filename> -alg [BnB|Approx|LS1|LS2] -time <cutoff in seconds> -seed <random seed>
 ```
+or a script
+```
+$ ./exec.sh
+```
 
 # Directory layout
 
@@ -22,3 +26,4 @@ python -inst <filename> -alg [BnB|Approx|LS1|LS2] -time <cutoff in seconds> -see
     ├── output                 # Solution & Solution trace files:
     ├── DATA
     └── README.md
+    └── exec.sh
