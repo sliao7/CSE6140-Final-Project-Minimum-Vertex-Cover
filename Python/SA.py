@@ -24,66 +24,63 @@ class SA:
         return G, int(nV), int(nE)
 
     def initial_solution(self, G, fo, start_time, cutoff, input_file):
-        temp_G = list(G.nodes())
-        VC = sorted(list(zip(list(dict(G.degree(temp_G)).values()), temp_G)), reverse=False)
+        _G = list(G.nodes())
+        VC = sorted(list(zip(list(dict(G.degree(_G)).values()), _G)), reverse=False)
         i = 0
-        while(i < len(VC) and (time.time() - start_time) < cutoff):
-            flag=True
+        while (i < len(VC) and (time.time() - start_time) < cutoff):
+            check = True
             for x in G.neighbors(VC[i][1]):
-                if x not in temp_G:
-                    flag = False
-            if flag:    
-                temp_G.remove(VC[i][1])            
-            i=i+1
-        fo.write(str(time.time()-start_time) + "," + str(len(temp_G)) + "\n")
-        print('Initial Solution:({}) {}'.format(len(temp_G), temp_G))
-        return temp_G
+                if x not in _G:
+                    check = False
+            if check:    
+                _G.remove(VC[i][1])            
+            i += 1
+        fo.write(str(time.time()-start_time) + "," + str(len(_G)) + "\n")
+        print('Initial Solution:({}) {}'.format(len(_G), _G))
+        return _G
 
-    def simulate_annealing(self, G, fo, sol, cutoff, nV, start_time, input_file, upperBound):
-        temp = 0.8   
-        update_sol = sol.copy()
-        uncov_old = []
-        num_eges= G.number_of_edges()
-        while ((time.time() - start_time) < cutoff and len(update_sol) > upperBound):
-            temp = 0.95 * temp 
-            while not uncov_old:
-                update_sol = sol.copy()
-                fo.write(str(time.time()-start_time) + "," + str(len(update_sol)) + "\n")
-                delete = random.choice(sol)
-                for x in G.neighbors(delete):
-                    if x not in sol:
-                        uncov_old.append(x)
-                        uncov_old.append(delete)
-                sol.remove(delete)     
+    def simulate_annealing(self, G, fo, S, cutoff, nV, start_time, input_file, upperBound):
+        T = 0.8   
+        S_ret = S.copy()
+        S_best = []
+        while ((time.time() - start_time) < cutoff and len(S_ret) > upperBound):
+            T = 0.95 * T 
+            while not S_best:
+                S_ret = S.copy()
+                fo.write(str(time.time()-start_time) + "," + str(len(S_ret)) + "\n")
+                delete_v = random.choice(S)
+                for v in G.neighbors(delete_v):
+                    if v not in S:
+                        S_best.append(v)
+                        S_best.append(delete_v)
+                S.remove(delete_v)     
 
             # del node
-            current = sol.copy()
-            uncov_new = uncov_old.copy()
-            delete = random.choice(sol)
-            for x in G.neighbors(delete):
-                if x not in sol:
-                    uncov_old.append(x)
-                    uncov_old.append(delete)            
-            sol.remove(delete)   
+            S_current = S.copy()
+            uncovered_S = S_best.copy()
+            delete_v = random.choice(S)
+            for v in G.neighbors(delete_v):
+                if v not in S:
+                    S_best.append(v)
+                    S_best.append(delete_v)            
+            S.remove(delete_v)   
 
             # add node
-            enter = random.choice(uncov_old)
-            sol.append(enter)
-            for x in G.neighbors(enter):
-                if x not in sol:
-                    uncov_old.remove(enter)
-                    uncov_old.remove(x)
+            add_v = random.choice(S_best)
+            S.append(add_v)
+            for v in G.neighbors(add_v):
+                if v not in S:
+                    S_best.remove(v)
+                    S_best.remove(add_v)
 
-            cost_new = len(uncov_new)
-            cost_old = len(uncov_old)
-            if cost_new < cost_old: 
-                prob = math.exp(float(cost_new - cost_old)/float(temp))
-                num = round(random.uniform(0,1),10)
-                if num > prob:    
-                    sol = current.copy()
-                    uncov_old = uncov_new.copy()
+            if len(uncovered_S) < len(S_best): 
+                p = math.exp(float(len(uncovered_S) - len(S_best))/T)
+                alpha = random.uniform(0, 1)
+                if alpha > p:    
+                    S = S_current.copy()
+                    S_best = uncovered_S.copy()
 
-        return sorted(update_sol)
+        return S_ret
 
     def main(self, input_file, cutoff, seed):
         random.seed(seed)
@@ -93,8 +90,8 @@ class SA:
 
         start_time = time.time()
         G_init = G.copy()
-        sol = self.initial_solution(G=G_init, fo=fo, start_time=start_time, cutoff=cutoff, input_file=input_file)
-        final_solution = self.simulate_annealing(G, fo, sol, cutoff, nV, start_time, input_file, opt_cutoff.get(input_file, 10))
+        S_init = self.initial_solution(G=G_init, fo=fo, start_time=start_time, cutoff=cutoff, input_file=input_file)
+        final_solution = self.simulate_annealing(G, fo, S_init, cutoff, nV, start_time, input_file, opt_cutoff.get(input_file, 10))
         fo.close()
         print('Final Solution: ({}) {}'.format(len(final_solution), final_solution))
 
@@ -108,7 +105,8 @@ class SA:
 
 
 if __name__ == '__main__':
-    # python temp.py -input DATA/dummy1.graph -time 600 -seed 1000
+    # python SA.py -input DATA/dummy1.graph -time 600 -seed 1000
+    # python Python/main.py -inst DATA/dummy2.graph -alg SA -time 600 -seed 600
     parser=argparse.ArgumentParser(description='Input parser for SA')
     parser.add_argument('-input',action='store',type=str,required=True,help='Input graph datafile')
     parser.add_argument('-time',action='store',default=600,type=float,required=False,help='Cutoff running time for algorithm')
