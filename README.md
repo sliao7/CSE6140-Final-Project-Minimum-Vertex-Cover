@@ -1,19 +1,24 @@
 # CSE6140-Final-Project-Minimum-Vertex-Cover
 
-* [Project Description](https://github.com/sliao7/CSE6140-Final-Project-Minimum-Vertex-Cover/blob/main/ProjectDescription.pdf) 
-* [Project Track (Google Doc)](https://docs.google.com/document/d/1JsIHct9oHIeVAoM40PQAYM0Gm56RJXrTna-X_DkEBg4/edit?usp=sharing)
-* [Report Link (Overleaf)](https://www.overleaf.com/6949346528jtzqvdvtbthy)
+# Prerequisites and Dependencies
+You will need the following packages to run the code. To install the packages used in this project, run the following command.
+```
+$ pip install networx
+$ pip install deap
+```
+Our code is based on python version 3.7
 
+# Running the code
 
-## Branch-and-Bound 
-* Used a 2-Approximation Algorithm to find the lower bound quickly
-* Applied Binary Decision Tree to loop through all possible vertex covers
-* Used a priority queue to find the most promising decision node to branch based on the degree of vertex in the remaining graph and the lowerbound of decision node
+To test and run this code, you will need the following:
+```
+python -inst <filename> -alg [BnB|Approx|LS1|LS2] -time <cutoff in seconds> -seed <random seed>
+```
 
-* Note: can also apply Linear Programming relaxation to find a lower bound. See related [ Math Notes](http://theory.stanford.edu/~trevisan/cs261/lecture07.pdf) and [ Python Code](https://realpython.com/linear-programming-python/)
+# Directory layout
 
-## Approximation 
-
-## Local Search 1
-
-## Local Search 2
+    .
+    ├── code                   # Algorithms
+    ├── output                 # Solution & Solution trace files:
+    ├── DATA
+    └── README.md
