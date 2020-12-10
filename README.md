@@ -1,4 +1,5 @@
 # CSE6140-Final-Project-Minimum-Vertex-Cover
+The report can be find [here](https://github.com/sliao7/CSE6140-Final-Project-Minimum-Vertex-Cover/blob/main/cse6140_report.pdf).
 
 # Prerequisites and Dependencies
 You will need the following packages to run the code. To install the packages used in this project, run the following command.
